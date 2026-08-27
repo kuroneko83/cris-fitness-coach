@@ -1,0 +1,55 @@
+# Decap CMS configuration
+# TODO: replace YOUR_GITHUB_USER/cris-fitness-coach with the real repo
+# OAuth callback: https://YOUR-DOMAIN/api/oauth/callback (see /api folder)
+
+backend:
+  name: github
+  repo: kuroneko83/cris-fitness-coach
+  branch: main
+  base_url: https://YOUR-DOMAIN # Vercel deployment URL serving /api/oauth
+
+locale: en
+media_folder: public/images
+public_folder: /images
+
+collections:
+  - name: testimonials
+    label: Testimonials
+    folder: src/content/testimonials
+    format: json
+    create: true
+    slug: '{{name}}-{{lang}}'
+    editor:
+      preview: false
+    fields:
+      - { label: Name, name: name, widget: string }
+      - label: Language
+        name: lang
+        widget: select
+        options: [en, ja]
+        default: en
+      - { label: Quote, name: quote, widget: text }
+      - label: Result badge (e.g. "-9kg")
+        name: result
+        widget: string
+        required: false
+      - { label: Order, name: order, widget: number, default: 99, value_type: int, min: 0 }
+
+  - name: blog
+    label: Blog
+    folder: src/content/blog
+    format: md-frontmatter
+    create: true
+    slug: '{{slug}}'
+    editor:
+      preview: false
+    fields:
+      - { label: Title, name: title, widget: string }
+      - label: Language
+        name: lang
+        widget: select
+        options: [en, ja]
+        default: en
+      - { label: Description, name: description, widget: text }
+      - { label: Publish date, name: pubDate, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
+      - { label: Body, name: body, widget: markdown }

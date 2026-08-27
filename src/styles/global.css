@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #dc2626;
+  --color-brand-dark: #b91c1c;
+  --color-gold: #f59e0b;
+  --color-charcoal: #282b30;
+  --color-charcoal-deep: #1e2126;
+  --color-mist: #f2f3f7;
+  --color-ink: #3e3e3e;
+  --color-body-text: #545454;
+  --font-display: "Hind Siliguri", "Noto Sans JP", sans-serif;
+  --font-body: "Open Sans", "Noto Sans JP", sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #545454;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: #3e3e3e;
+  }
+
+  ::selection {
+    background-color: #dc2626;
+    color: #fff;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  /* Diagonal stripe texture (dark sections) */
+  .bg-stripes-dark {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent 0px,
+      transparent 10px,
+      rgb(255 255 255 / 0.025) 10px,
+      rgb(255 255 255 / 0.025) 12px
+    );
+  }
+
+  .bg-glow-red-dark {
+    background: radial-gradient(ellipse 80% 60% at 50% 100%, rgb(220 38 38 / 0.14), transparent 70%);
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* Marquee */
+  .animate-marquee {
+    animation: marquee 28s linear infinite;
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* Pulsing ring on hero badge */
+  .animate-ping-slow {
+    animation: ping-slow 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  @keyframes ping-slow {
+    0% { transform: scale(1); opacity: 0.6; }
+    75%, 100% { transform: scale(1.8); opacity: 0; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .animate-marquee {
+    animation: none;
+  }
+}

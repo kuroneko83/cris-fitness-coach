@@ -1,0 +1,22 @@
+---
+interface Props {
+  kicker: string;
+  title: string;
+  subtitle?: string;
+  align?: 'left' | 'center';
+  dark?: boolean;
+}
+
+const { kicker, title, subtitle, align = 'left', dark = false } = Astro.props;
+const isCenter = align === 'center';
+---
+
+<div class={isCenter ? 'text-center' : ''}>
+  <p class={`reveal flex items-center gap-3 text-sm font-bold tracking-widest text-brand uppercase ${isCenter ? 'justify-center' : ''}`}>
+    <span class="h-0.5 w-10 bg-brand" aria-hidden="true"></span>
+    {kicker}
+    {isCenter && <span class="h-0.5 w-10 bg-brand" aria-hidden="true"></span>}
+  </p>
+  <h2 class={`reveal reveal-delay-1 font-display mt-4 text-4xl leading-tight font-bold sm:text-5xl ${dark ? 'text-white' : 'text-ink'}`}>{title}</h2>
+  {subtitle && <p class={`reveal reveal-delay-2 mt-4 max-w-2xl text-lg leading-relaxed ${isCenter ? 'mx-auto' : ''} ${dark ? 'text-zinc-400' : 'text-body-text'}`}>{subtitle}</p>}
+</div>

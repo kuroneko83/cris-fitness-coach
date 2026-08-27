@@ -1,0 +1,35 @@
+---
+interface Testimonial {
+  name: string;
+  quote: string;
+  result?: string;
+}
+
+interface Props {
+  testimonial: Testimonial;
+}
+
+const { testimonial } = Astro.props;
+---
+
+<figure class="group flex h-full flex-col justify-between rounded-2xl border border-black/5 bg-white p-8 shadow-sm transition duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-brand/10">
+  <div>
+    <div class="flex gap-1 text-gold" aria-hidden="true">
+      {Array.from({ length: 5 }).map(() => (
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2l1.7 5.3H17l-4.4 3.2 1.7 5.3-4.3-3.2-4.3 3.2 1.7-5.3L3 7.3h5.3z"/></svg>
+      ))}
+    </div>
+    <blockquote class="mt-5 text-[15px] leading-relaxed text-body-text">
+      “{testimonial.quote}”
+    </blockquote>
+  </div>
+  <figcaption class="mt-6 flex items-center justify-between gap-3 border-t border-black/5 pt-5">
+    <span class="flex items-center gap-3">
+      <span class="font-display flex h-10 w-10 items-center justify-center rounded-full bg-mist text-base font-bold text-brand">{testimonial.name.charAt(0)}</span>
+      <span class="text-sm font-bold text-ink">{testimonial.name}</span>
+    </span>
+    {testimonial.result && (
+      <span class="font-display rounded-full bg-brand/10 px-3.5 py-1.5 text-sm font-bold text-brand">{testimonial.result}</span>
+    )}
+  </figcaption>
+</figure>

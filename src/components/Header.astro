@@ -1,0 +1,89 @@
+---
+import { SITE } from '../config';
+import { languages, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const otherLang = lang === 'en' ? 'ja' : 'en';
+
+const links = [
+  { href: `/${lang}`, key: 'home' },
+  { href: `/${lang}/services`, key: 'services' },
+  { href: `/${lang}/weight-loss`, key: 'weightLoss' },
+  { href: `/${lang}/about`, key: 'about' },
+  { href: `/${lang}/schedule`, key: 'schedule' },
+  { href: `/${lang}/testimonials`, key: 'testimonials' },
+  { href: `/${lang}/contact`, key: 'contact' },
+] as const;
+
+const t = {
+  en: { home: 'Home', services: 'Services', weightLoss: 'Weight Loss', about: 'About', schedule: 'Schedule', testimonials: 'Results', contact: 'Contact', book: 'Book Free Session' },
+  ja: { home: 'ホーム', services: 'サービス', weightLoss: 'ダイエット', about: 'プロフィール', schedule: 'スケジュール', testimonials: 'お客様の声', contact: 'アクセス', book: '無料体験を予約' },
+}[lang];
+---
+
+<header class="sticky top-0 z-50 border-b border-black/5 bg-white/95 backdrop-blur-md">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+    <a href={`/${lang}`} class="group flex items-center gap-3">
+      <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand font-display text-xl font-bold text-white transition group-hover:scale-105">
+        C
+      </span>
+      <span class="font-display text-xl font-bold text-ink">
+        CRIS <span class="text-brand">FITNESS</span>
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-7 text-sm font-semibold tracking-wide text-body-text uppercase lg:flex">
+      {links.map((l) => (
+        <a href={l.href} class="relative transition hover:text-brand after:absolute after:-bottom-1.5 after:left-0 after:h-0.5 after:w-0 after:bg-brand after:transition-all hover:after:w-full">{t[l.key]}</a>
+      ))}
+    </nav>
+
+    <div class="hidden items-center gap-4 lg:flex">
+      <a
+        href={`/${otherLang}${Astro.url.pathname.replace(`/${lang}`, '') || '/'}`}
+        class="text-xs font-bold text-neutral-400 transition hover:text-brand"
+        aria-label="Switch language"
+      >
+        {languages[otherLang]}
+      </a>
+      <a href={`/${lang}/schedule`} class="rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand/25 transition hover:-translate-y-0.5 hover:bg-brand-dark">
+        {t.book}
+      </a>
+    </div>
+
+    <button id="menu-btn" class="rounded-lg p-2 text-ink transition hover:text-brand lg:hidden" aria-label="Menu" aria-expanded="false">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <div id="mobile-menu" class="hidden border-t border-black/5 bg-white px-5 pb-6 lg:hidden">
+    <nav class="flex flex-col gap-4 py-4 text-sm font-semibold text-body-text uppercase">
+      {links.map((l) => (
+        <a href={l.href} class="transition hover:text-brand">{t[l.key]}</a>
+      ))}
+      <div class="flex items-center justify-between pt-3">
+        <a href={`/${otherLang}${Astro.url.pathname.replace(`/${lang}`, '') || '/'}`} class="text-xs font-bold text-neutral-400">
+          {languages[otherLang]}
+        </a>
+        <a href={`/${lang}/schedule`} class="rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white">
+          {t.book}
+        </a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById('menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  btn?.addEventListener('click', () => {
+    const open = menu?.classList.toggle('hidden') === false;
+    btn.setAttribute('aria-expanded', String(open));
+  });
+</script>

@@ -1,0 +1,68 @@
+---
+import { SITE } from '../config';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = {
+  en: { rights: 'All rights reserved.', admin: 'Admin', explore: 'Explore', social: 'Follow', contact: 'Contact' },
+  ja: { rights: 'All rights reserved.', admin: '管理', explore: 'メニュー', social: 'フォロー', contact: 'お問い合わせ' },
+}[lang];
+
+const year = new Date().getFullYear();
+
+const explore = [
+  { href: `/${lang}/services`, label: lang === 'ja' ? 'サービス' : 'Services' },
+  { href: `/${lang}/weight-loss`, label: lang === 'ja' ? 'ダイエット' : 'Weight Loss' },
+  { href: `/${lang}/schedule`, label: lang === 'ja' ? 'スケジュール' : 'Schedule' },
+  { href: `/${lang}/testimonials`, label: lang === 'ja' ? 'お客様の声' : 'Results' },
+  { href: `/${lang}/contact`, label: t.contact },
+];
+
+const socials = [
+  { label: 'Instagram', href: SITE.socials.instagram },
+  { label: 'YouTube', href: SITE.socials.youtube },
+  { label: 'X', href: SITE.socials.x },
+];
+---
+
+<footer class="bg-charcoal text-zinc-300">
+  <div class="mx-auto max-w-7xl px-5 py-16">
+    <div class="grid gap-12 md:grid-cols-[2fr_1fr_1fr]">
+      <div>
+        <a href={`/${lang}`} class="flex items-center gap-3">
+          <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand font-display text-xl font-bold text-white">C</span>
+          <span class="font-display text-xl font-bold text-white">CRIS <span class="text-brand">FITNESS</span></span>
+        </a>
+        <p class="mt-5 max-w-sm text-sm leading-relaxed text-zinc-400">{SITE.tagline[lang]}</p>
+        <p class="mt-4 text-sm text-zinc-500">{SITE.gym.name} — {SITE.gym.city}</p>
+      </div>
+
+      <div>
+        <p class="text-xs font-bold tracking-widest text-zinc-500 uppercase">{t.explore}</p>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          {explore.map((l) => (
+            <li><a href={l.href} class="transition hover:text-brand">{l.label}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <p class="text-xs font-bold tracking-widest text-zinc-500 uppercase">{t.social}</p>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          {socials.map((s) => (
+            <li><a href={s.href} target="_blank" rel="noopener" class="transition hover:text-brand">{s.label}</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row">
+      <p class="text-xs text-zinc-500">© {year} {SITE.brandName}. {t.rights}</p>
+      <a href="/admin" class="text-xs text-zinc-600 transition hover:text-brand">{t.admin}</a>
+    </div>
+  </div>
+</footer>

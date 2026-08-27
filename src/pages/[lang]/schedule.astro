@@ -1,0 +1,115 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../config';
+import { getTranslation, languages, type Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return Object.keys(languages).map((lang) => ({ params: { lang }, props: { lang } }));
+}
+
+const { lang } = Astro.props as { lang: Lang };
+const t = getTranslation(lang);
+
+const weekly = [
+  { day: lang === 'ja' ? '月・水・金' : 'Mon / Wed / Fri', time: '19:00–20:00', type: t.schedule.weekly.group },
+  { day: lang === 'ja' ? '火・木' : 'Tue / Thu', time: '19:00–21:00', type: t.schedule.weekly.personal },
+  { day: lang === 'ja' ? '土' : 'Sat', time: '10:00–12:00', type: `${t.schedule.weekly.group} + ${t.schedule.weekly.personal}` },
+  { day: lang === 'ja' ? '日' : 'Sun', time: '—', type: '—' },
+];
+---
+
+<BaseLayout lang={lang} title={t.nav.schedule} description={t.schedule.subtitle}>
+  <section class="relative overflow-hidden bg-charcoal">
+    <div class="bg-stripes-dark absolute inset-0"></div>
+    <div class="relative mx-auto max-w-7xl px-5 py-24 sm:py-32">
+      <p class="reveal text-sm font-bold tracking-widest text-brand uppercase">{t.schedule.kicker}</p>
+      <h1 class="reveal reveal-delay-1 font-display mt-3 text-5xl leading-tight font-bold text-white sm:text-6xl">{t.schedule.title}</h1>
+      <p class="reveal reveal-delay-2 mt-4 max-w-2xl text-lg leading-relaxed text-zinc-300">{t.schedule.subtitle}</p>
+    </div>
+  </section>
+
+  <section class="bg-mist py-20">
+    <div class="mx-auto max-w-7xl px-5">
+      <div class="grid gap-12 lg:grid-cols-[1fr_2fr]">
+        <div class="reveal">
+          <div class="rounded-2xl border border-black/5 bg-white p-8 shadow-sm">
+            <h2 class="font-display text-2xl font-bold text-ink">{t.schedule.weeklyTitle}</h2>
+            <table class="mt-5 w-full text-left text-sm">
+              <thead class="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                <tr>
+                  <th class="border-b border-black/5 py-2.5">{lang === 'ja' ? '曜日' : 'Day'}</th>
+                  <th class="border-b border-black/5 py-2.5">{lang === 'ja' ? '時間' : 'Time'}</th>
+                  <th class="border-b border-black/5 py-2.5">{lang === 'ja' ? '種類' : 'Type'}</th>
+                </tr>
+              </thead>
+              <tbody class="text-body-text">
+                {weekly.map((r) => (
+                  <tr>
+                    <td class="border-b border-black/5 py-3 font-bold text-ink">{r.day}</td>
+                    <td class="border-b border-black/5 py-3">{r.time}</td>
+                    <td class="border-b border-black/5 py-3">{r.type}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p class="mt-4 text-xs text-neutral-400">{t.schedule.weekly.note}</p>
+          </div>
+        </div>
+
+        <div class="reveal reveal-delay-1">
+          <div class="rounded-2xl border border-black/5 bg-white p-8 shadow-sm">
+            <h2 class="font-display text-2xl font-bold text-ink">{t.schedule.calendarTitle}</h2>
+            <p class="mt-2 text-sm text-body-text">{t.schedule.calendarSubtitle}</p>
+            <!-- Cal.com inline embed. Set your real username in src/config.ts -->
+            <div class="mt-5 overflow-hidden rounded-xl border border-black/5" style="min-height: 720px">
+              <div style="width:100%;height:100%;min-height:720px" id="cal-inline"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline define:vars={{ calLink: SITE.cal.username }}>
+  (function (C, A, L) {
+    let p = function (a, ar) { a.q.push(ar); };
+    let d = C.document;
+    C.Cal =
+      C.Cal ||
+      function () {
+        let cal = C.Cal;
+        let ar = arguments;
+        if (!cal.loaded) {
+          cal.ns = {};
+          cal.q = cal.q || [];
+          d.head.appendChild(d.createElement('script')).src = A;
+          cal.loaded = true;
+        }
+        if (ar[0] === L) {
+          const api = function () { p(api, arguments); };
+          api.q = api.q || [];
+          const namespace = ar[1];
+          if (typeof namespace === 'string') {
+            cal.ns[namespace] = cal.ns[namespace] || api;
+            p(cal.ns[namespace], ar);
+            p(cal, ['initNamespace', namespace]);
+          } else p(cal, ar);
+          return;
+        }
+        p(cal, ar);
+      };
+  })(window, 'https://app.cal.com/embed/embed.js', 'init');
+
+  Cal('inline', {
+    elementOrSelector: '#cal-inline',
+    config: { layout: 'month_view', theme: 'light' },
+    calLink: calLink,
+  });
+  Cal('ui', {
+    theme: 'light',
+    cssVarsPerTheme: { light: { 'cal-brand': '#dc2626' } },
+    hideEventTypeDetails: false,
+    layout: 'month_view',
+  });
+</script>
