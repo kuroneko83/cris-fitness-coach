@@ -38,14 +38,23 @@ const icons: Record<string, string> = {
   <!-- Hero (dark photo, like reference) -->
   <section class="relative bg-charcoal">
     <video
-      id="hero-video"
-      class="absolute inset-0 h-full w-full object-cover object-[55%_center] sm:object-center opacity-55 sm:opacity-40"
+      id="hero-video-a"
+      class="hero-video"
+      src="/videos/boxing.mp4"
       autoplay
       muted
       playsinline
-      poster="/images/hero.jpg"
+      preload="auto"
     >
-      <source src="/videos/boxing.mp4" type="video/mp4" />
+    </video>
+    <video
+      id="hero-video-b"
+      class="hero-video is-hidden"
+      src="/videos/threadmill.mp4"
+      muted
+      playsinline
+      preload="auto"
+    >
     </video>
     <!-- Mobile: vertical gradient, lighter so the boxer's movement is visible -->
     <div class="absolute inset-0 bg-gradient-to-b from-charcoal-deep/80 via-charcoal/40 to-charcoal-deep/90 sm:hidden"></div>
@@ -200,17 +209,60 @@ const icons: Record<string, string> = {
 </BaseLayout>
 
 <script>
-  // Hero video playlist — plays each clip in order, then loops back to the first.
-  const playlist = ['/videos/boxing.mp4', '/videos/threadmill.mp4'];
+  // Hero video playlist: two stacked <video> elements, both preloaded.
+  // When the active clip ends, the next one (already buffered) crossfades in.
+  const videoA = document.getElementById('hero-video-a') as HTMLVideoElement | null;
+  const videoB = document.getElementById('hero-video-b') as HTMLVideoElement | null;
 
-  const video = document.getElementById('hero-video') as HTMLVideoElement | null;
-  if (video) {
-    let index = 0;
-    video.addEventListener('ended', () => {
-      index = (index + 1) % playlist.length;
-      video.src = playlist[index];
-      video.load();
-      video.play().catch(() => {});
-    });
+  if (videoA && videoB) {
+    let current = videoA;
+
+    const swap = () => {
+      const next = current === videoA ? videoB : videoA;
+      next.currentTime = 0;
+      next
+        .play()
+        .then(() => {
+          next.classList.remove('is-hidden');
+          current.classList.add('is-hidden');
+          current.pause();
+          current = next;
+        })
+        .catch(() => {
+          // If the next clip is still buffering, retry shortly.
+          setTimeout(swap, 500);
+        });
+    };
+
+    videoA.addEventListener('ended', swap);
+    videoB.addEventListener('ended', swap);
   }
 </script>
+
+<style>
+  .hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 55% center;
+    opacity: 0.55;
+    transition: opacity 1s ease;
+  }
+
+  .hero-video.is-hidden {
+    opacity: 0;
+  }
+
+  @media (min-width: 640px) {
+    .hero-video {
+      object-position: center;
+      opacity: 0.4;
+    }
+
+    .hero-video.is-hidden {
+      opacity: 0;
+    }
+  }
+</style>
