@@ -211,6 +211,8 @@ const icons: Record<string, string> = {
   //   - Mobile gets 720p variants (~1MB + ~0.4MB instead of ~2.2MB + ~6MB)
   //   - The second video only starts downloading after the first is playing
   //   - On 2G / data-saver, videos are skipped entirely (static dark hero)
+  // iOS notes: Safari ignores preload="auto", so we call load() explicitly and
+  // only crossfade once the next clip has decoded frames (readyState >= 2).
   const videoA = document.getElementById('hero-video-a') as HTMLVideoElement | null;
   const videoB = document.getElementById('hero-video-b') as HTMLVideoElement | null;
 
@@ -219,13 +221,48 @@ const icons: Record<string, string> = {
     const slowConnection =
       connection && (connection.saveData || ['slow-2g', '2g'].includes(connection.effectiveType));
 
-    if (slowConnection) {
-      // Keep the dark textured hero — no video downloads.
-    } else {
+    if (!slowConnection) {
       const quality = window.matchMedia('(max-width: 640px)').matches ? '-720' : '';
       let current = videoA;
+      let switching = false;
+
+      const beginNext = () => {
+        if (switching) return;
+        const next = current === videoA ? videoB : videoA;
+
+        if (next.error || !next.getAttribute('src')) {
+          // Next clip unavailable — restart the current one so the hero is never blank.
+          restartCurrent();
+          return;
+        }
+
+        if (next.readyState >= 2) {
+          switching = true;
+          next.currentTime = 0;
+          next.play()
+            .then(() => {
+              next.classList.remove('is-hidden');
+              current.classList.add('is-hidden');
+              current.pause();
+              current = next;
+              switching = false;
+            })
+            .catch(() => {
+              switching = false;
+              setTimeout(beginNext, 500);
+            });
+        } else {
+          next.load(); // iOS: forces the download to actually start
+        }
+      };
+
+      const restartCurrent = () => {
+        current.currentTime = 0;
+        current.play().catch(() => {});
+      };
 
       videoA.src = `/videos/boxing${quality}.mp4`;
+      videoA.load();
       videoA.play().catch(() => {});
 
       // Only load the next clip once the first one is actually playing.
@@ -233,34 +270,19 @@ const icons: Record<string, string> = {
         'playing',
         () => {
           videoB.src = `/videos/threadmill${quality}.mp4`;
-          // If clip A ended while B was still buffering, swap as soon as B is ready.
-          videoB.addEventListener(
-            'canplay',
-            () => {
-              if (videoA.ended) swap();
-            },
-            { once: true }
-          );
+          videoB.load();
         },
         { once: true }
       );
 
-      const swap = () => {
-        if (!videoB.src) return; // next clip not loaded yet — keep current frame
-        const next = current === videoA ? videoB : videoA;
-        next.currentTime = 0;
-        next.play()
-          .then(() => {
-            next.classList.remove('is-hidden');
-            current.classList.add('is-hidden');
-            current.pause();
-            current = next;
-          })
-          .catch(() => setTimeout(swap, 500));
-      };
+      videoA.addEventListener('ended', beginNext);
+      videoB.addEventListener('ended', beginNext);
 
-      videoA.addEventListener('ended', swap);
-      videoB.addEventListener('ended', swap);
+      // Watchdog: if a clip ends and the swap stalls (slow buffer), keep retrying
+      // so the hero never stays frozen or blank.
+      setInterval(() => {
+        if (current.ended) beginNext();
+      }, 1000);
     }
   }
 </script>
