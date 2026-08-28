@@ -38,7 +38,7 @@ const icons: Record<string, string> = {
   <!-- Hero (dark photo, like reference) -->
   <section class="relative bg-charcoal">
     <video
-      class="absolute inset-0 h-full w-full object-cover opacity-40"
+      class="absolute inset-0 h-full w-full object-cover object-[55%_center] sm:object-center opacity-55 sm:opacity-40"
       autoplay
       muted
       loop
@@ -47,7 +47,10 @@ const icons: Record<string, string> = {
     >
       <source src="/videos/boxing.mp4" type="video/mp4" />
     </video>
-    <div class="absolute inset-0 bg-gradient-to-r from-charcoal-deep/95 via-charcoal/80 to-charcoal/30"></div>
+    <!-- Mobile: vertical gradient, lighter so the boxer's movement is visible -->
+    <div class="absolute inset-0 bg-gradient-to-b from-charcoal-deep/80 via-charcoal/40 to-charcoal-deep/90 sm:hidden"></div>
+    <!-- Desktop: horizontal gradient keeping text readable -->
+    <div class="absolute inset-0 hidden bg-gradient-to-r from-charcoal-deep/95 via-charcoal/80 to-charcoal/30 sm:block"></div>
     <div class="bg-stripes-dark absolute inset-0"></div>
 
     <div class="relative mx-auto max-w-7xl px-5 pt-28 pb-44 sm:pt-36 sm:pb-56">
