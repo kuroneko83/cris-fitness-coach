@@ -40,8 +40,6 @@ const icons: Record<string, string> = {
     <video
       id="hero-video-a"
       class="hero-video"
-      src="/videos/boxing.mp4"
-      autoplay
       muted
       playsinline
       preload="auto"
@@ -50,7 +48,6 @@ const icons: Record<string, string> = {
     <video
       id="hero-video-b"
       class="hero-video is-hidden"
-      src="/videos/threadmill.mp4"
       muted
       playsinline
       preload="auto"
@@ -209,33 +206,62 @@ const icons: Record<string, string> = {
 </BaseLayout>
 
 <script>
-  // Hero video playlist: two stacked <video> elements, both preloaded.
-  // When the active clip ends, the next one (already buffered) crossfades in.
+  // Hero video playlist: two stacked <video> elements with crossfade.
+  // Adaptive strategy for slow connections:
+  //   - Mobile gets 720p variants (~1MB + ~0.4MB instead of ~2.2MB + ~6MB)
+  //   - The second video only starts downloading after the first is playing
+  //   - On 2G / data-saver, videos are skipped entirely (static dark hero)
   const videoA = document.getElementById('hero-video-a') as HTMLVideoElement | null;
   const videoB = document.getElementById('hero-video-b') as HTMLVideoElement | null;
 
   if (videoA && videoB) {
-    let current = videoA;
+    const connection = (navigator as any).connection;
+    const slowConnection =
+      connection && (connection.saveData || ['slow-2g', '2g'].includes(connection.effectiveType));
 
-    const swap = () => {
-      const next = current === videoA ? videoB : videoA;
-      next.currentTime = 0;
-      next
-        .play()
-        .then(() => {
-          next.classList.remove('is-hidden');
-          current.classList.add('is-hidden');
-          current.pause();
-          current = next;
-        })
-        .catch(() => {
-          // If the next clip is still buffering, retry shortly.
-          setTimeout(swap, 500);
-        });
-    };
+    if (slowConnection) {
+      // Keep the dark textured hero — no video downloads.
+    } else {
+      const quality = window.matchMedia('(max-width: 640px)').matches ? '-720' : '';
+      let current = videoA;
 
-    videoA.addEventListener('ended', swap);
-    videoB.addEventListener('ended', swap);
+      videoA.src = `/videos/boxing${quality}.mp4`;
+      videoA.play().catch(() => {});
+
+      // Only load the next clip once the first one is actually playing.
+      videoA.addEventListener(
+        'playing',
+        () => {
+          videoB.src = `/videos/threadmill${quality}.mp4`;
+          // If clip A ended while B was still buffering, swap as soon as B is ready.
+          videoB.addEventListener(
+            'canplay',
+            () => {
+              if (videoA.ended) swap();
+            },
+            { once: true }
+          );
+        },
+        { once: true }
+      );
+
+      const swap = () => {
+        if (!videoB.src) return; // next clip not loaded yet — keep current frame
+        const next = current === videoA ? videoB : videoA;
+        next.currentTime = 0;
+        next.play()
+          .then(() => {
+            next.classList.remove('is-hidden');
+            current.classList.add('is-hidden');
+            current.pause();
+            current = next;
+          })
+          .catch(() => setTimeout(swap, 500));
+      };
+
+      videoA.addEventListener('ended', swap);
+      videoB.addEventListener('ended', swap);
+    }
   }
 </script>
 
