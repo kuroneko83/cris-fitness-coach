@@ -38,10 +38,10 @@ const icons: Record<string, string> = {
   <!-- Hero (dark photo, like reference) -->
   <section class="relative bg-charcoal">
     <video
+      id="hero-video"
       class="absolute inset-0 h-full w-full object-cover object-[55%_center] sm:object-center opacity-55 sm:opacity-40"
       autoplay
       muted
-      loop
       playsinline
       poster="/images/hero.jpg"
     >
@@ -198,3 +198,19 @@ const icons: Record<string, string> = {
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  // Hero video playlist — plays each clip in order, then loops back to the first.
+  const playlist = ['/videos/boxing.mp4', '/videos/threadmill.mp4'];
+
+  const video = document.getElementById('hero-video') as HTMLVideoElement | null;
+  if (video) {
+    let index = 0;
+    video.addEventListener('ended', () => {
+      index = (index + 1) % playlist.length;
+      video.src = playlist[index];
+      video.load();
+      video.play().catch(() => {});
+    });
+  }
+</script>
