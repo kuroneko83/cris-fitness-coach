@@ -37,7 +37,16 @@ const icons: Record<string, string> = {
 <BaseLayout lang={lang} title={t.nav.home} description={t.hero.subtitle}>
   <!-- Hero (dark photo, like reference) -->
   <section class="relative bg-charcoal">
-    <img src="/images/hero.jpg" alt="" class="absolute inset-0 h-full w-full object-cover object-center opacity-40" loading="eager" />
+    <video
+      class="absolute inset-0 h-full w-full object-cover opacity-40"
+      autoplay
+      muted
+      loop
+      playsinline
+      poster="/images/hero.jpg"
+    >
+      <source src="/videos/boxing.mp4" type="video/mp4" />
+    </video>
     <div class="absolute inset-0 bg-gradient-to-r from-charcoal-deep/95 via-charcoal/80 to-charcoal/30"></div>
     <div class="bg-stripes-dark absolute inset-0"></div>
 
